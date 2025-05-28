@@ -2,6 +2,7 @@ import discord
 import os
 import random
 import asyncio
+import aiohttp
 from discord import FFmpegPCMAudio
 from keep_alive import keep_alive
 
@@ -81,6 +82,35 @@ image_reaction_emojis = [
 ]
 
 
+async def get_random_danbooru_image():
+    """
+    Fetch a random image from Danbooru API.
+    Returns the image URL or None if failed.
+    """
+    try:
+        async with aiohttp.ClientSession() as session:
+            # Search for random posts with safe tags
+            url = "https://danbooru.donmai.us/posts.json"
+            params = {
+                'limit': 1,
+                'random': 'true',
+                'tags': 'rating:safe cute',  # Use safe rating and cute tag
+            }
+            
+            async with session.get(url, params=params) as response:
+                if response.status == 200:
+                    posts = await response.json()
+                    if posts and len(posts) > 0:
+                        post = posts[0]
+                        # Return the file URL if available
+                        if 'file_url' in post and post['file_url']:
+                            return post['file_url']
+    except Exception as e:
+        print(f"Error fetching Danbooru image: {e}")
+    
+    return None
+
+
 @client.event
 async def on_ready():
     """Event triggered when the bot is ready and connected."""
@@ -144,6 +174,14 @@ async def on_message(message):
     try:
         # Special response for "doro hentai"
         if 'doro hentai' in conteudo:
+            # 20% chance to fetch from Danbooru, 80% chance for regular response
+            if random.randint(1, 100) <= 20:
+                danbooru_image = await get_random_danbooru_image()
+                if danbooru_image:
+                    await message.channel.send(f"Doro encontrou isso! {danbooru_image}")
+                    return
+            
+            # Default response
             await message.channel.send(
                 "https://media.discordapp.net/stickers/1291711474917445673.gif"
             )
