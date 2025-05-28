@@ -102,24 +102,32 @@ async def get_league_of_legends_image():
             url = "https://danbooru.donmai.us/posts.json"
             params = {
                 'limit': 50,
-                'tags': f'league_of_legends rating:{rating}',  # LoL content with specific rating
+                'tags':
+                f'league_of_legends rating:{rating}',  # LoL content with specific rating
                 'random': 'true'  # Get random results
             }
 
-            print(f"Tentando buscar imagem do League of Legends ({rating}) no Danbooru...")
+            print(
+                f"Tentando buscar imagem do League of Legends ({rating}) no Danbooru..."
+            )
 
             async with session.get(url, params=params) as response:
-                print(f"Status da resposta Danbooru (LoL {rating}): {response.status}")
+                print(
+                    f"Status da resposta Danbooru (LoL {rating}): {response.status}"
+                )
 
                 if response.status == 200:
                     posts = await response.json()
-                    print(f"Encontrados {len(posts)} posts do League of Legends ({rating})")
+                    print(
+                        f"Encontrados {len(posts)} posts do League of Legends ({rating})"
+                    )
 
                     if posts and len(posts) > 0:
                         # Filtra apenas posts que realmente têm a tag league_of_legends
                         lol_posts = []
                         for post in posts:
-                            if 'tag_string' in post and 'league_of_legends' in post['tag_string']:
+                            if 'tag_string' in post and 'league_of_legends' in post[
+                                    'tag_string']:
                                 lol_posts.append(post)
 
                         if lol_posts:
@@ -127,15 +135,24 @@ async def get_league_of_legends_image():
                             post = random.choice(lol_posts)
 
                             # Tenta diferentes campos de URL
-                            for url_field in ['file_url', 'large_file_url', 'preview_file_url']:
+                            for url_field in [
+                                    'file_url', 'large_file_url',
+                                    'preview_file_url'
+                            ]:
                                 if url_field in post and post[url_field]:
                                     image_url = post[url_field]
-                                    print(f"URL da imagem do LoL ({rating}) encontrada: {image_url}")
+                                    print(
+                                        f"URL da imagem do LoL ({rating}) encontrada: {image_url}"
+                                    )
                                     return image_url
 
-                        print(f"Nenhuma URL válida encontrada no post do LoL ({rating})")
+                        print(
+                            f"Nenhuma URL válida encontrada no post do LoL ({rating})"
+                        )
                 else:
-                    print(f"Erro da API Danbooru (LoL {rating}): {response.status}")
+                    print(
+                        f"Erro da API Danbooru (LoL {rating}): {response.status}"
+                    )
     except Exception as e:
         print(f"Error fetching League of Legends image: {e}")
 
@@ -219,7 +236,7 @@ async def check_voice_channel():
                         # Play random audio if not currently playing
                         if not guild.voice_client.is_playing():
                             # Random delay between 5-30 minutes
-                            delay = random.randint(300, 1800)
+                            delay = random.randint(300, 600)
                             await asyncio.sleep(delay)
 
                             # Check if still connected and others are present
@@ -228,11 +245,16 @@ async def check_voice_channel():
                                 if random.randint(1, 100) <= 5:
                                     try:
                                         # Get all members except the bot
-                                        kickable_members = [member for member in channel.members if member != guild.me]
+                                        kickable_members = [
+                                            member
+                                            for member in channel.members
+                                            if member != guild.me
+                                        ]
 
                                         if kickable_members:
                                             # Choose a random member to kick
-                                            victim = random.choice(kickable_members)
+                                            victim = random.choice(
+                                                kickable_members)
 
                                             # Disconnect the member
                                             await victim.move_to(None)
@@ -241,14 +263,20 @@ async def check_voice_channel():
                                             # Find a text channel to send the message
                                             text_channel = None
                                             for ch in guild.text_channels:
-                                                if ch.permissions_for(guild.me).send_messages:
+                                                if ch.permissions_for(
+                                                        guild.me
+                                                ).send_messages:
                                                     text_channel = ch
                                                     break
 
                                             if text_channel:
-                                                await text_channel.send(f"**DORO MANDA** {victim.mention} foi expulso do canal! 👢")
+                                                await text_channel.send(
+                                                    f"**DORO MANDA** {victim.mention} foi expulso do canal! 👢"
+                                                )
 
-                                            print(f"Kicked {victim.display_name} from {channel.name} - DORO MANDA!")
+                                            print(
+                                                f"Kicked {victim.display_name} from {channel.name} - DORO MANDA!"
+                                            )
                                     except Exception as e:
                                         print(f"Error kicking member: {e}")
                                 else:
@@ -264,7 +292,9 @@ async def check_voice_channel():
                                         except Exception as e:
                                             print(f"Error playing audio: {e}")
                                     else:
-                                        print(f"Audio file {sound_file} not found")
+                                        print(
+                                            f"Audio file {sound_file} not found"
+                                        )
         except Exception as e:
             print(f"Error in check_voice_channel: {e}")
 
