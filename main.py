@@ -197,7 +197,20 @@ async def on_message(message):
                     print("Tentando buscar imagem do Danbooru...")
                     danbooru_image = await get_random_danbooru_image()
                     if danbooru_image:
-                        await message.channel.send(f"Doro encontrou isso! {danbooru_image}")
+                        sent_message = await message.channel.send(f"Doro encontrou isso! {danbooru_image}")
+                        
+                        # Reage à própria mensagem com emojis aleatórios
+                        try:
+                            # Escolhe 1-2 emojis aleatórios para reagir
+                            num_reactions = random.randint(1, 2)
+                            chosen_emojis = random.sample(image_reaction_emojis, min(num_reactions, len(image_reaction_emojis)))
+                            
+                            for emoji in chosen_emojis:
+                                await sent_message.add_reaction(emoji)
+                                await asyncio.sleep(0.5)  # Pequeno delay entre reações
+                        except Exception as e:
+                            print(f"Erro ao reagir à própria mensagem: {e}")
+                        
                         return
                     else:
                         print("Danbooru não retornou imagem, usando resposta padrão")
