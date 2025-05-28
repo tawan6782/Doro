@@ -81,6 +81,49 @@ image_reaction_emojis = [
 ]
 
 
+async def get_league_of_legends_image():
+    """
+    Fetch a random League of Legends image from Danbooru API.
+    Returns the image URL or None if failed.
+    """
+    try:
+        async with aiohttp.ClientSession() as session:
+            # Search for random posts with League of Legends tags
+            url = "https://danbooru.donmai.us/posts.json"
+            params = {
+                'limit': 20,
+                'tags': 'league_of_legends rating:safe',  # League of Legends content only, safe rating
+            }
+
+            print(f"Tentando buscar imagem do League of Legends no Danbooru...")
+            
+            async with session.get(url, params=params) as response:
+                print(f"Status da resposta Danbooru (LoL): {response.status}")
+                
+                if response.status == 200:
+                    posts = await response.json()
+                    print(f"Encontrados {len(posts)} posts do League of Legends")
+                    
+                    if posts and len(posts) > 0:
+                        # Seleciona um post aleatório dos resultados
+                        post = random.choice(posts)
+                        
+                        # Tenta diferentes campos de URL
+                        for url_field in ['file_url', 'large_file_url', 'preview_file_url']:
+                            if url_field in post and post[url_field]:
+                                image_url = post[url_field]
+                                print(f"URL da imagem do LoL encontrada: {image_url}")
+                                return image_url
+                        
+                        print("Nenhuma URL válida encontrada no post do LoL")
+                else:
+                    print(f"Erro da API Danbooru (LoL): {response.status}")
+    except Exception as e:
+        print(f"Error fetching League of Legends image: {e}")
+
+    return None
+
+
 async def get_random_danbooru_image():
     """
     Fetch a random image from Danbooru API.
@@ -189,8 +232,34 @@ async def on_message(message):
     conteudo = message.content.lower()
 
     try:
+        # Special response for "doro lol" - League of Legends images
+        if 'doro lol' in conteudo:
+            try:
+                print("Tentando buscar imagem do League of Legends...")
+                danbooru_image = await get_league_of_legends_image()
+                if danbooru_image:
+                    sent_message = await message.channel.send(f"Doro encontrou uma imagem do LoL! {danbooru_image}")
+                    
+                    # Reage à própria mensagem com emojis aleatórios
+                    try:
+                        # Escolhe 1-2 emojis aleatórios para reagir
+                        num_reactions = random.randint(1, 2)
+                        chosen_emojis = random.sample(image_reaction_emojis, min(num_reactions, len(image_reaction_emojis)))
+                        
+                        for emoji in chosen_emojis:
+                            await sent_message.add_reaction(emoji)
+                            await asyncio.sleep(0.5)  # Pequeno delay entre reações
+                    except Exception as e:
+                        print(f"Erro ao reagir à própria mensagem: {e}")
+                else:
+                    await message.channel.send("Doro não conseguiu encontrar uma imagem do LoL... 😔")
+            except Exception as e:
+                print(f"Erro ao buscar imagem do League of Legends: {e}")
+                await message.channel.send("Doro deu erro tentando buscar LoL... 😵")
+            return
+
         # Special response for "doro hentai"
-        if 'doro hentai' in conteudo:
+        elif 'doro hentai' in conteudo:
             # 50% chance to fetch from Danbooru, 50% chance for regular response
             if random.randint(1, 100) <= 50:
                 try:
