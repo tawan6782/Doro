@@ -83,36 +83,43 @@ image_reaction_emojis = [
 
 async def get_league_of_legends_image():
     """
-    Fetch a random League of Legends image from Danbooru API.
+    Fetch a random League of Legends image from Danbooru API with rating distribution.
+    33% explicit, 33% safe, 33% questionable.
     Returns the image URL or None if failed.
     """
     try:
+        # Determina o rating baseado em probabilidade
+        rating_chance = random.randint(1, 100)
+        if rating_chance <= 33:
+            rating = 'explicit'
+        elif rating_chance <= 66:
+            rating = 'safe'
+        else:
+            rating = 'questionable'
+        
         async with aiohttp.ClientSession() as session:
-            # Search for random posts with specific League of Legends tags
+            # Search for random posts with specific League of Legends tags and rating
             url = "https://danbooru.donmai.us/posts.json"
             params = {
                 'limit': 50,
-                'tags': 'league_of_legends',  # Only League of Legends content
+                'tags': f'league_of_legends rating:{rating}',  # LoL content with specific rating
                 'random': 'true'  # Get random results
             }
 
-            print(
-                f"Tentando buscar imagem do League of Legends no Danbooru...")
+            print(f"Tentando buscar imagem do League of Legends ({rating}) no Danbooru...")
 
             async with session.get(url, params=params) as response:
-                print(f"Status da resposta Danbooru (LoL): {response.status}")
+                print(f"Status da resposta Danbooru (LoL {rating}): {response.status}")
 
                 if response.status == 200:
                     posts = await response.json()
-                    print(
-                        f"Encontrados {len(posts)} posts do League of Legends")
+                    print(f"Encontrados {len(posts)} posts do League of Legends ({rating})")
 
                     if posts and len(posts) > 0:
                         # Filtra apenas posts que realmente têm a tag league_of_legends
                         lol_posts = []
                         for post in posts:
-                            if 'tag_string' in post and 'league_of_legends' in post[
-                                    'tag_string']:
+                            if 'tag_string' in post and 'league_of_legends' in post['tag_string']:
                                 lol_posts.append(post)
 
                         if lol_posts:
@@ -120,20 +127,15 @@ async def get_league_of_legends_image():
                             post = random.choice(lol_posts)
 
                             # Tenta diferentes campos de URL
-                            for url_field in [
-                                    'file_url', 'large_file_url',
-                                    'preview_file_url'
-                            ]:
+                            for url_field in ['file_url', 'large_file_url', 'preview_file_url']:
                                 if url_field in post and post[url_field]:
                                     image_url = post[url_field]
-                                    print(
-                                        f"URL da imagem do LoL encontrada: {image_url}"
-                                    )
+                                    print(f"URL da imagem do LoL ({rating}) encontrada: {image_url}")
                                     return image_url
 
-                        print("Nenhuma URL válida encontrada no post do LoL")
+                        print(f"Nenhuma URL válida encontrada no post do LoL ({rating})")
                 else:
-                    print(f"Erro da API Danbooru (LoL): {response.status}")
+                    print(f"Erro da API Danbooru (LoL {rating}): {response.status}")
     except Exception as e:
         print(f"Error fetching League of Legends image: {e}")
 
