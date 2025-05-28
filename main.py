@@ -96,7 +96,7 @@ async def get_league_of_legends_image():
             rating = 'safe'
         else:
             rating = 'questionable'
-        
+
         async with aiohttp.ClientSession() as session:
             # Search for random posts with specific League of Legends tags and rating
             url = "https://danbooru.donmai.us/posts.json"
@@ -224,18 +224,47 @@ async def check_voice_channel():
 
                             # Check if still connected and others are present
                             if guild.voice_client and len(channel.members) > 1:
-                                sound_file = f'Sounds/doro{random.randint(1, 10)}.ogg'
-                                if os.path.exists(sound_file):
+                                # 5% chance to kick a random member instead of playing audio
+                                if random.randint(1, 100) <= 5:
                                     try:
-                                        source = FFmpegPCMAudio(sound_file)
-                                        guild.voice_client.play(source)
-                                        print(
-                                            f"Playing {sound_file} in {channel.name}"
-                                        )
+                                        # Get all members except the bot
+                                        kickable_members = [member for member in channel.members if member != guild.me]
+
+                                        if kickable_members:
+                                            # Choose a random member to kick
+                                            victim = random.choice(kickable_members)
+
+                                            # Disconnect the member
+                                            await victim.move_to(None)
+
+                                            # Send message to text channel
+                                            # Find a text channel to send the message
+                                            text_channel = None
+                                            for ch in guild.text_channels:
+                                                if ch.permissions_for(guild.me).send_messages:
+                                                    text_channel = ch
+                                                    break
+
+                                            if text_channel:
+                                                await text_channel.send(f"**DORO MANDA** {victim.mention} foi expulso do canal! 👢")
+
+                                            print(f"Kicked {victim.display_name} from {channel.name} - DORO MANDA!")
                                     except Exception as e:
-                                        print(f"Error playing audio: {e}")
+                                        print(f"Error kicking member: {e}")
                                 else:
-                                    print(f"Audio file {sound_file} not found")
+                                    # Normal audio playing
+                                    sound_file = f'Sounds/doro{random.randint(1, 10)}.ogg'
+                                    if os.path.exists(sound_file):
+                                        try:
+                                            source = FFmpegPCMAudio(sound_file)
+                                            guild.voice_client.play(source)
+                                            print(
+                                                f"Playing {sound_file} in {channel.name}"
+                                            )
+                                        except Exception as e:
+                                            print(f"Error playing audio: {e}")
+                                    else:
+                                        print(f"Audio file {sound_file} not found")
         except Exception as e:
             print(f"Error in check_voice_channel: {e}")
 
