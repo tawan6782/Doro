@@ -232,7 +232,7 @@ async def on_message(message):
     conteudo = message.content.lower()
 
     try:
-        # Special response for "doro lol" - League of Legends images
+        # Special response for "doro lol" - League of Legends images (check first)
         if 'doro lol' in conteudo:
             try:
                 print("Tentando buscar imagem do League of Legends...")
@@ -290,11 +290,6 @@ async def on_message(message):
             await message.channel.send(
                 "https://media.discordapp.net/stickers/1291711474917445673.gif"
             )
-            return
-
-        # 10% chance to respond "doro" to any message
-        elif random.randint(1, 100) <= 10:
-            await message.channel.send("doro")
             return
 
         # Special "libertar carga" command sequence
@@ -428,6 +423,11 @@ async def on_message(message):
                         except Exception as e:
                             print(f"Error reacting to image: {e}")
                     return
+
+        # 10% chance to respond "doro" to any message (before general doro responses)
+        elif random.randint(1, 100) <= 10:
+            await message.channel.send("doro")
+            return
 
         # General "doro" mentions - random response
         elif 'doro' in conteudo:
