@@ -111,9 +111,10 @@ async def get_league_of_legends_image():
                         # Filtra apenas posts que realmente têm a tag league_of_legends
                         lol_posts = []
                         for post in posts:
-                            if 'tag_string' in post and 'league_of_legends' in post['tag_string']:
+                            if 'tag_string' in post and 'league_of_legends' in post[
+                                    'tag_string']:
                                 lol_posts.append(post)
-                        
+
                         if lol_posts:
                             # Seleciona um post aleatório dos resultados filtrados
                             post = random.choice(lol_posts)
@@ -150,7 +151,8 @@ async def get_random_danbooru_image():
             url = "https://danbooru.donmai.us/posts.json"
             params = {
                 'limit': 20,
-                'tags': 'rating:safe OR rating:questionable OR rating:explicit',  # All rating types
+                'tags':
+                'rating:safe OR rating:questionable OR rating:explicit',  # All rating types
             }
 
             print(f"Tentando buscar imagem do Danbooru...")
@@ -290,8 +292,8 @@ async def on_message(message):
 
         # Special response for "doro hentai"
         elif 'doro hentai' in conteudo:
-            # 50% chance to fetch from Danbooru, 50% chance for regular response
-            if random.randint(1, 100) <= 50:
+            # 40% chance to fetch from Danbooru, 60% chance for regular response
+            if random.randint(1, 100) <= 40:
                 try:
                     print("Tentando buscar imagem do Danbooru...")
                     danbooru_image = await get_random_danbooru_image()
