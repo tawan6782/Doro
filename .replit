@@ -1,4 +1,5 @@
-modules = ["python-3.11"]
+modules = ["python-3.11", "nix"]
+run = "python main.py"
 
 [nix]
 channel = "stable-24_05"
@@ -25,7 +26,7 @@ args = "pip install discord.py && python main.py"
 waitForPort = 5000
 
 [deployment]
-run = ["sh", "-c", "pip install discord.py && python main.py"]
+run = ["sh", "-c", "python main.py"]
 
 [[ports]]
 localPort = 5000
