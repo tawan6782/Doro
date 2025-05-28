@@ -256,7 +256,7 @@ async def on_message(message):
                 danbooru_image = await get_league_of_legends_image()
                 if danbooru_image:
                     sent_message = await message.channel.send(
-                        f"DORO LOL"! {danbooru_image})
+                        f"DORO LOL! {danbooru_image}")
 
                     # Reage à própria mensagem com emojis aleatórios
                     try:
