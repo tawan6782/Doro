@@ -75,9 +75,8 @@ gifs_bom_dia = [
 
 # Emojis for image reactions
 image_reaction_emojis = [
-    '😍', '🤩', '😎', '🥳', '😂', '🤣', '😭', '😱', '🤯', '🔥',
-    '💯', '👀', '👍', '👎', '❤️', '💖', '💕', '🤗', '😊', '😏',
-    '🤭', '🙄', '😬', '🤔', '🧐', '😳', '🥺', '😌', '🤤', '🤡',
+    '😍', '🤩', '😎', '🥳', '😂', '🤣', '😭', '😱', '🤯', '🔥', '💯', '👀', '👍', '👎', '❤️',
+    '💖', '💕', '🤗', '😊', '😏', '🤭', '🙄', '😬', '🤔', '🧐', '😳', '🥺', '😌', '🤤', '🤡',
     '👻', '💀', '⭐', '✨', '💥', '💫', '🌟', '🎉', '🎊', '🙏'
 ]
 
@@ -92,22 +91,36 @@ async def get_random_danbooru_image():
             # Search for random posts with safe tags
             url = "https://danbooru.donmai.us/posts.json"
             params = {
-                'limit': 1,
-                'random': 'true',
-                'tags': 'rating:safe cute',  # Use safe rating and cute tag
+                'limit': 20,
+                'tags': 'rating:safe',  # Only safe content
             }
+
+            print(f"Tentando buscar imagem do Danbooru...")
             
             async with session.get(url, params=params) as response:
+                print(f"Status da resposta Danbooru: {response.status}")
+                
                 if response.status == 200:
                     posts = await response.json()
+                    print(f"Encontrados {len(posts)} posts do Danbooru")
+                    
                     if posts and len(posts) > 0:
-                        post = posts[0]
-                        # Return the file URL if available
-                        if 'file_url' in post and post['file_url']:
-                            return post['file_url']
+                        # Seleciona um post aleatório dos resultados
+                        post = random.choice(posts)
+                        
+                        # Tenta diferentes campos de URL
+                        for url_field in ['file_url', 'large_file_url', 'preview_file_url']:
+                            if url_field in post and post[url_field]:
+                                image_url = post[url_field]
+                                print(f"URL da imagem encontrada: {image_url}")
+                                return image_url
+                        
+                        print("Nenhuma URL válida encontrada no post")
+                else:
+                    print(f"Erro da API Danbooru: {response.status}")
     except Exception as e:
         print(f"Error fetching Danbooru image: {e}")
-    
+
     return None
 
 
@@ -134,14 +147,16 @@ async def check_voice_channel():
                     # Disconnect if alone in voice channel
                     if len(channel.members) <= 1:
                         await guild.voice_client.disconnect()
-                        print(f"Disconnected from {channel.name} - alone in channel")
+                        print(
+                            f"Disconnected from {channel.name} - alone in channel"
+                        )
                     else:
                         # Play random audio if not currently playing
                         if not guild.voice_client.is_playing():
                             # Random delay between 5-30 minutes
                             delay = random.randint(300, 1800)
                             await asyncio.sleep(delay)
-                            
+
                             # Check if still connected and others are present
                             if guild.voice_client and len(channel.members) > 1:
                                 sound_file = f'Sounds/doro{random.randint(1, 10)}.ogg'
@@ -149,14 +164,16 @@ async def check_voice_channel():
                                     try:
                                         source = FFmpegPCMAudio(sound_file)
                                         guild.voice_client.play(source)
-                                        print(f"Playing {sound_file} in {channel.name}")
+                                        print(
+                                            f"Playing {sound_file} in {channel.name}"
+                                        )
                                     except Exception as e:
                                         print(f"Error playing audio: {e}")
                                 else:
                                     print(f"Audio file {sound_file} not found")
         except Exception as e:
             print(f"Error in check_voice_channel: {e}")
-        
+
         await asyncio.sleep(5)
 
 
@@ -174,13 +191,19 @@ async def on_message(message):
     try:
         # Special response for "doro hentai"
         if 'doro hentai' in conteudo:
-            # 20% chance to fetch from Danbooru, 80% chance for regular response
-            if random.randint(1, 100) <= 20:
-                danbooru_image = await get_random_danbooru_image()
-                if danbooru_image:
-                    await message.channel.send(f"Doro encontrou isso! {danbooru_image}")
-                    return
-            
+            # 50% chance to fetch from Danbooru, 50% chance for regular response
+            if random.randint(1, 100) <= 50:
+                try:
+                    print("Tentando buscar imagem do Danbooru...")
+                    danbooru_image = await get_random_danbooru_image()
+                    if danbooru_image:
+                        await message.channel.send(f"Doro encontrou isso! {danbooru_image}")
+                        return
+                    else:
+                        print("Danbooru não retornou imagem, usando resposta padrão")
+                except Exception as e:
+                    print(f"Erro ao buscar imagem do Danbooru: {e}")
+
             # Default response
             await message.channel.send(
                 "https://media.discordapp.net/stickers/1291711474917445673.gif"
@@ -196,7 +219,8 @@ async def on_message(message):
         elif message.content.lower().startswith("doro libertar carga"):
             await message.channel.send("⚠️ ***Sobrecarga detectada...***")
             await asyncio.sleep(3)
-            await message.channel.send("💓 *Pressurizando reservatório de dados...*")
+            await message.channel.send(
+                "💓 *Pressurizando reservatório de dados...*")
             await asyncio.sleep(4)
             await message.channel.send(
                 "💦💥 *EJACULANDO PACOTES BINÁRIOS EM DIREÇÃO AO PLANO MATERIAL!!!*"
@@ -206,13 +230,13 @@ async def on_message(message):
         # Alternative hentai command
         elif 'doro hental' in conteudo:
             await message.channel.send(
-                "https://cdn2.hentaigifz.com/93580/hardfuck.gif"
-            )
+                "https://cdn2.hentaigifz.com/93580/hardfuck.gif")
             return
 
         # Good night commands
         elif any(kw in conteudo for kw in [
-            'boa noite doro', 'doro boa noite', 'dorme doro', 'vai dormir doro'
+                'boa noite doro', 'doro boa noite', 'dorme doro',
+                'vai dormir doro'
         ]):
             if not is_sleeping:
                 await message.channel.send(
@@ -224,8 +248,8 @@ async def on_message(message):
 
         # Good morning commands
         elif any(kw in conteudo for kw in [
-            'doro bom dia', 'doro bomdia', 'bom dia doro', 'bomdia doro',
-            'acorda doro', 'doro acorda'
+                'doro bom dia', 'doro bomdia', 'bom dia doro', 'bomdia doro',
+                'acorda doro', 'doro acorda'
         ]):
             is_sleeping = False
             await client.change_presence(status=discord.Status.online)
@@ -241,8 +265,8 @@ async def on_message(message):
 
         # Hostile commands
         elif any(x in conteudo for x in [
-            'morre doro', 'vai se foder doro', 'vai se fude doro',
-            'doro se mata', 'se mata doro'
+                'morre doro', 'vai se foder doro', 'vai se fude doro',
+                'doro se mata', 'se mata doro'
         ]):
             await message.channel.send(
                 "https://cdn.discordapp.com/attachments/684383483640152094/1375662630097915914/image.png"
@@ -257,26 +281,27 @@ async def on_message(message):
                     # Disconnect from current channel if connected elsewhere
                     if message.guild.voice_client:
                         await message.guild.voice_client.disconnect()
-                    
+
                     voice_client = await channel.connect()
                     sound_file = f'Sounds/doro{random.randint(1, 10)}.ogg'
-                    
+
                     if os.path.exists(sound_file):
                         source = FFmpegPCMAudio(sound_file)
                         voice_client.play(source)
                         await message.channel.send("DORO! 🎵")
                     else:
-                        await message.channel.send("DORO! 🎵 (audio file not found)")
-                        
+                        await message.channel.send(
+                            "DORO! 🎵 (audio file not found)")
+
                 except Exception as e:
                     print(f"Erro ao entrar na call: {e}")
-                    await message.channel.send(f"Erro ao entrar no canal: {str(e)}")
+                    await message.channel.send(
+                        f"Erro ao entrar no canal: {str(e)}")
                     if message.guild.voice_client:
                         await message.guild.voice_client.disconnect()
             else:
                 await message.channel.send(
-                    "Você precisa estar em um canal de voz primeiro!"
-                )
+                    "Você precisa estar em um canal de voz primeiro!")
             return
 
         # Leave voice channel command
@@ -285,13 +310,15 @@ async def on_message(message):
                 await message.guild.voice_client.disconnect()
                 await message.channel.send("Tchau... 👋")
             else:
-                await message.channel.send("Eu não estou em nenhum canal de voz!")
+                await message.channel.send(
+                    "Eu não estou em nenhum canal de voz!")
             return
 
         # Question mark reaction
         elif 'doro?' in conteudo:
             emojis = [
-                '👀', '❓', '🧐', '😳', '🤨', '😶', '👍', '👎', '❤️', '🔥', '🤭', '🐂', '🙏', '🤫'
+                '👀', '❓', '🧐', '😳', '🤨', '😶', '👍', '👎', '❤️', '🔥', '🤭', '🐂',
+                '🙏', '🤫'
             ]
             emoji = random.choice(emojis)
             await message.add_reaction(emoji)
@@ -301,14 +328,17 @@ async def on_message(message):
         if message.attachments:
             for attachment in message.attachments:
                 # Check if attachment is an image
-                if any(attachment.filename.lower().endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp']):
+                if any(attachment.filename.lower().endswith(ext) for ext in
+                       ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp']):
                     # 50% chance to react to images
                     if random.randint(1, 100) <= 50:
                         try:
                             # Choose 1-3 random emojis to react with
                             num_reactions = random.randint(1, 3)
-                            chosen_emojis = random.sample(image_reaction_emojis, min(num_reactions, len(image_reaction_emojis)))
-                            
+                            chosen_emojis = random.sample(
+                                image_reaction_emojis,
+                                min(num_reactions, len(image_reaction_emojis)))
+
                             for emoji in chosen_emojis:
                                 await message.add_reaction(emoji)
                                 # Small delay between reactions to avoid rate limiting
@@ -333,14 +363,15 @@ def main():
     """Main function to start the bot."""
     # Start the keep-alive server
     keep_alive()
-    
+
     # Get Discord token from environment variable
     token = os.getenv("DISCORD_TOKEN")
     if not token:
         print("ERROR: DISCORD_TOKEN environment variable not set!")
-        print("Please set your Discord bot token in the environment variables.")
+        print(
+            "Please set your Discord bot token in the environment variables.")
         return
-    
+
     try:
         # Run the Discord bot
         client.run(token)
