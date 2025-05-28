@@ -88,12 +88,12 @@ async def get_league_of_legends_image():
     """
     try:
         async with aiohttp.ClientSession() as session:
-            # Search for random posts with League of Legends tags
+            # Search for random posts with specific League of Legends tags
             url = "https://danbooru.donmai.us/posts.json"
             params = {
-                'limit': 20,
-                'tags':
-                'league_of_legends rating:safe OR rating:questionable OR rating:explicit',  # League of Legends content with all ratings
+                'limit': 50,
+                'tags': 'league_of_legends',  # Only League of Legends content
+                'random': 'true'  # Get random results
             }
 
             print(
@@ -108,20 +108,27 @@ async def get_league_of_legends_image():
                         f"Encontrados {len(posts)} posts do League of Legends")
 
                     if posts and len(posts) > 0:
-                        # Seleciona um post aleatório dos resultados
-                        post = random.choice(posts)
+                        # Filtra apenas posts que realmente têm a tag league_of_legends
+                        lol_posts = []
+                        for post in posts:
+                            if 'tag_string' in post and 'league_of_legends' in post['tag_string']:
+                                lol_posts.append(post)
+                        
+                        if lol_posts:
+                            # Seleciona um post aleatório dos resultados filtrados
+                            post = random.choice(lol_posts)
 
-                        # Tenta diferentes campos de URL
-                        for url_field in [
-                                'file_url', 'large_file_url',
-                                'preview_file_url'
-                        ]:
-                            if url_field in post and post[url_field]:
-                                image_url = post[url_field]
-                                print(
-                                    f"URL da imagem do LoL encontrada: {image_url}"
-                                )
-                                return image_url
+                            # Tenta diferentes campos de URL
+                            for url_field in [
+                                    'file_url', 'large_file_url',
+                                    'preview_file_url'
+                            ]:
+                                if url_field in post and post[url_field]:
+                                    image_url = post[url_field]
+                                    print(
+                                        f"URL da imagem do LoL encontrada: {image_url}"
+                                    )
+                                    return image_url
 
                         print("Nenhuma URL válida encontrada no post do LoL")
                 else:
