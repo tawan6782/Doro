@@ -490,6 +490,12 @@ async def on_message(message):
                     "Eu não estou em nenhum canal de voz!")
             return
 
+        # Response for vic/vegs/bic/vig keywords
+        elif any(keyword in conteudo for keyword in ['vic', 'vegs', 'bic', 'vig']):
+            await message.channel.send("doro esmaga")
+            await message.add_reaction('😈')
+            return
+
         # Question mark reaction
         elif 'doro?' in conteudo:
             emojis = [
