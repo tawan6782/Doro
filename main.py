@@ -93,7 +93,7 @@ async def get_league_of_legends_image():
             params = {
                 'limit': 20,
                 'tags':
-                'league_of_legends rating:safe',  # League of Legends content only, safe rating
+                'league_of_legends rating:safe OR rating:questionable OR rating:explicit',  # League of Legends content with all ratings
             }
 
             print(
@@ -143,7 +143,7 @@ async def get_random_danbooru_image():
             url = "https://danbooru.donmai.us/posts.json"
             params = {
                 'limit': 20,
-                'tags': 'rating:safe',  # Only safe content
+                'tags': 'rating:safe OR rating:questionable OR rating:explicit',  # All rating types
             }
 
             print(f"Tentando buscar imagem do Danbooru...")
