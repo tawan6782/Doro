@@ -230,10 +230,12 @@ async def on_message(message):
         return
 
     conteudo = message.content.lower()
+    print(f"DEBUG: Mensagem recebida: '{message.content}' -> processada como: '{conteudo}'")
 
     try:
         # Special response for "doro lol" - League of Legends images (check first)
         if 'doro lol' in conteudo:
+            print(f"DEBUG: Comando 'doro lol' detectado! Conteúdo da mensagem: '{conteudo}'")
             try:
                 print("Tentando buscar imagem do League of Legends...")
                 danbooru_image = await get_league_of_legends_image()
